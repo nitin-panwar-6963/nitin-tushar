@@ -1,0 +1,6 @@
+# If your VM's public IP ever changes, update this one line to match
+# (format: <your-vm-ip>.nip.io) and run:
+#   docker compose up -d --build caddy
+172.198.57.229.nip.io {
+	reverse_proxy frontend:100
+}

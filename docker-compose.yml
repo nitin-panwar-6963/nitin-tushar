@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: ./backend
+    container_name: back-nitin
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    # No "ports:" published to the host on purpose — nothing outside the
+    # docker network needs to reach the backend directly. The frontend's
+    # nginx reaches it internally via the "backend" service name (see
+    # frontend/nginx.conf), and Caddy reaches the frontend the same way.
+    # If you want to hit it directly for debugging (e.g. VM_IP:8000/docs),
+    # temporarily add back:
+    #   ports:
+    #     - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: front-nitin
+    restart: unless-stopped
+    # Same idea — only Caddy talks to this container now, over the docker
+    # network, so port 100 doesn't need to be published to the host either.
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy-nitin
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:
